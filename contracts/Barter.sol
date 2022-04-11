@@ -25,14 +25,15 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
     //Rinkeby WETH contract address
     address public constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
 
-    address owner;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     constructor() {
-        owner = msg.sender;
+        _setupRole(ADMIN_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, address(this));
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "must have owner role");
+        require(hasRole(ADMIN_ROLE, msg.sender), "must have admin role");
         _;
     }
 
@@ -207,5 +208,10 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
             msg.sender,
             _tokenID
         );
+    }
+
+    //add owners to contract
+    function addOwner(address _newOwner) public onlyOwner {
+        _setupRole(ADMIN_ROLE, _newOwner);
     }
 }

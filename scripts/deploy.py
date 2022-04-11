@@ -5,23 +5,14 @@ import json
 import shutil
 import os
 
+# current deployment address: 0xc24afecb277Dd2f5b50b5B51f1fC9d5b8234101A
+
 accountPublic1 = config["wallets"]["public1"]
 accountPublic2 = config["wallets"]["public2"]
 account1 = get_account(1)
 account2 = get_account(2)
 nft_address = '0x3F029AB70b36848e7D9b615FE70de3367dBF8821'
 tokenID = 0
-
-
-
-    # print(interface.ERC20('0xc778417E063141139Fce010982780140Aa0cD5Ab').balanceOf(accountPublic1))
-    # NFT = interface.IERC721('0x958ba3A9cC45A01A5C1D58831E6F6421C8b9640D')
-    # print(NFT.balanceOf(accountPublic1))
-    # print(NFT.ownerOf(0))
-
-
-
-#IERC721().approve(address, tokenID)
 
 
 def interact():
@@ -57,7 +48,7 @@ def interact():
 
         #____________________________Repay____________________________
         #weth_token.approve(swap.address, amount, {"from": account1})
-        #swap.repay(nft_address, tokenID, amount, {"from": account1})
+        #swap.repay(accountPublic1, nft_address, tokenID, amount, {"from": account1})
 
 
         #____________________________Trade____________________________
@@ -66,7 +57,7 @@ def interact():
         print('trade executed?',nft.ownerOf(0)  == accountPublic2)
 
         #____________________________Default____________________________
-        swap.handleDefault(accountPublic1, nft_address, tokenID, {"from": account1})
+        #swap.handleDefault(accountPublic1, nft_address, tokenID, {"from": account1})
 
 
 
@@ -83,8 +74,9 @@ def reset():
         nft.safeTransferFrom(accountPublic2, accountPublic1, tokenID, {"from": account2})
 
 def main():
-    deploy(False)
+    #deploy(True)
     swap = Barter[-1]
+    print('contract address:', swap.address)
     #interact()
     #swap.emergencyExit(nft_address, 0, {"from": account1})
 
