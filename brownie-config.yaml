@@ -1,0 +1,14 @@
+
+dependencies:
+  - OpenZeppelin/openzeppelin-contracts@4.5.0
+compiler:
+  solc:
+    remappings:
+      - '@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.5.0'
+dotenv: .env
+
+wallets:
+  from_key1: ${PRIVATE_KEY1}
+  from_key2: ${PRIVATE_KEY2}
+  public1: '0x1680df1901C033306f161ea35425c1463D52B0C6'
+  public2: '0x80311730A0f91134AC60f16d673dfF006BA4E55d'
