@@ -8,14 +8,14 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 contract Barter is IERC721Receiver, AccessControlEnumerable {
-    // struct for what each person owes to the seller, specific to what they bought, and when
+    // struct for what the buyer owes to the seller, and when
     struct userBorrow {
         uint256 amountOwed;
         address buyer;
         address seller;
         uint256 timestamp;
     }
-    //track how much a wallet has borrowed agsint all thier NFTs
+    //track how much a wallet has borrowed against all thier NFTs
     mapping(address => uint256) totalborrowedETH;
 
     // mapping: buyer -> NFT Contract -> tokenID -> struct(money owed, buyer, seller, purchase time)
@@ -68,7 +68,7 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
     ) public {
         /*
         * Security:
-        * ower must approve this contract to move thier NFT so even if
+        * NFT ower must approve this contract to move thier NFT so even if
         someone else calls this function, it only works if user pre-approved it
         * Only the initial buyer will recieve the NFT on repayment
         */
@@ -155,6 +155,8 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
             _tokenID
         );
         //reset mapping values
+        totalborrowedETH[_buyer] -= loanTracker[_buyer][_contract][_tokenID]
+            .amountOwed;
         loanTracker[_buyer][_contract][_tokenID].amountOwed = 0;
         loanTracker[_buyer][_contract][_tokenID].timestamp = 0;
         loanTracker[_buyer][_contract][_tokenID].buyer = address(0);

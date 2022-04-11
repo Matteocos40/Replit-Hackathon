@@ -8,10 +8,12 @@ fetch('https://testnets-api.opensea.io/api/v1/asset_contract/0x3F029AB70b36848e7
     .catch(err => console.error(err));
 
 // THE ABOVE IS NOT CORRECT: THE STEPS ARE AS FOLLOWS
-
+// https://docs.opensea.io/reference/retrieving-a-single-contract-testnets
 /* Step 1) Use OpenSea "Retrieving a single contract - Testnets" for a specific contract address
  *          - select the slug from the json response: response.json()['collection']['slug']
  * Step 2) Use OpenSea "Retrieving collection stats - Testnets" for the found slug
  *          - have to add the slug into the URL
  *          - select floor price: response.json()['stats']['floor_price']
  */
+
+//control option n
