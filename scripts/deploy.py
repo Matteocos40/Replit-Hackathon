@@ -47,8 +47,8 @@ def interact():
     
 
         #____________________________Repay____________________________
-        #weth_token.approve(swap.address, amount, {"from": account1})
-        #swap.repay(accountPublic1, nft_address, tokenID, amount, {"from": account1})
+        weth_token.approve(swap.address, amount, {"from": account1})
+        swap.repay(accountPublic1, nft_address, tokenID, amount, {"from": account1})
 
 
         #____________________________Trade____________________________
@@ -74,10 +74,10 @@ def reset():
         nft.safeTransferFrom(accountPublic2, accountPublic1, tokenID, {"from": account2})
 
 def main():
-    #deploy(True)
+    #deploy(False)
     swap = Barter[-1]
     print('contract address:', swap.address)
-    #interact()
+    interact()
     #swap.emergencyExit(nft_address, 0, {"from": account1})
 
     print('seller:         ',swap.sellerCollateralNFT(accountPublic1, nft_address, tokenID))

@@ -46,10 +46,10 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
         uint256 _tokenID
     ) public {
         /*
-    * Security:
-    * ower must approve this contract to move thier NFT so even if
-    someone else calls this function, it only works if user pre-approved it
-    */
+        * Security:
+        * ower must approve this contract to move thier NFT so even if
+        someone else calls this function, it only works if user pre-approved it
+        */
 
         IERC721(_contract).safeTransferFrom(_buyer, _seller, _tokenID);
     }
@@ -57,8 +57,7 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
     ///@notice function transfers ownership from buyer to this contract to be held as collateral
     ///@notice buyer will automaticall receive thier NFT back once they repay the item value
     ///@dev the calling contract/function must approve the transfer to this contract address
-
-    // backend should check to see if there is enough collateral value, it will also allow user to buy multiple items against one NFT
+    ///@param _itemValue must be in wei (10**18)
     function collateralizedPurchase(
         address _buyer,
         address _seller,
@@ -70,29 +69,38 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
         * Security:
         * NFT ower must approve this contract to move thier NFT so even if
         someone else calls this function, it only works if user pre-approved it
+        * User can only borrow from one seller at a time
         * Only the initial buyer will recieve the NFT on repayment
         */
 
-        //if they purchsed from new seller with same NFT, they must have payed off thier old debts
-        if (loanTracker[_buyer][_contract][_tokenID].seller != _seller) {
-            require(loanTracker[_buyer][_contract][_tokenID].amountOwed == 0);
-        }
-
-        if (loanTracker[_buyer][_contract][_tokenID].timestamp == 0) {
+        // if the seller is zero address, nft is not currently being used as collateral (i.e. no seller has a claim to the nft as collateral)
+        // thus, we transfer the nft and initiate values
+        // otherwise they can borrow against the nft again
+        if (loanTracker[_buyer][_contract][_tokenID].seller == address(0)) {
+            IERC721(_contract).safeTransferFrom(
+                _buyer,
+                address(this),
+                _tokenID
+            );
+            //initiate struct values for new purchase
+            loanTracker[_buyer][_contract][_tokenID].seller = _seller;
+            loanTracker[_buyer][_contract][_tokenID].buyer = _buyer;
             loanTracker[_buyer][_contract][_tokenID].timestamp = block
                 .timestamp;
-        } // could also check for default here, but issues may arise, better to have default manually called
-
-        IERC721(_contract).safeTransferFrom(_buyer, address(this), _tokenID);
-
+        }
+        // only use nft as collateral for one store at a time
+        require(
+            loanTracker[_buyer][_contract][_tokenID].seller == _seller,
+            "only use nft as collateral for one store at a time"
+        );
+        //update struct vlaues for new or old collateralized nft
         loanTracker[_buyer][_contract][_tokenID].amountOwed += _itemValue;
         totalborrowedETH[_buyer] += _itemValue;
-        loanTracker[_buyer][_contract][_tokenID].seller = _seller;
-        loanTracker[_buyer][_contract][_tokenID].buyer = _buyer;
     }
 
     ///@notice a user pays back a debt in WETH only and original buyer recieves ERC721
     ///@dev the calling contract/function must approve the transfer of ERC20 to the contract address
+    ///@param _amount must be in wei (10**18)
     function repay(
         address _buyer,
         address _contract,
@@ -126,9 +134,7 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
                 _tokenID
             );
             //reset struct values:
-            loanTracker[_buyer][_contract][_tokenID].timestamp = 0;
-            loanTracker[_buyer][_contract][_tokenID].buyer = address(0);
-            loanTracker[_buyer][_contract][_tokenID].seller = address(0);
+            delete loanTracker[_buyer][_contract][_tokenID];
         }
     }
 
@@ -154,13 +160,11 @@ contract Barter is IERC721Receiver, AccessControlEnumerable {
             loanTracker[_buyer][_contract][_tokenID].seller,
             _tokenID
         );
-        //reset mapping values
+        //update total borrow amount
         totalborrowedETH[_buyer] -= loanTracker[_buyer][_contract][_tokenID]
             .amountOwed;
-        loanTracker[_buyer][_contract][_tokenID].amountOwed = 0;
-        loanTracker[_buyer][_contract][_tokenID].timestamp = 0;
-        loanTracker[_buyer][_contract][_tokenID].buyer = address(0);
-        loanTracker[_buyer][_contract][_tokenID].seller = address(0);
+        //reset struct values
+        delete loanTracker[_buyer][_contract][_tokenID];
     }
 
     function onERC721Received(
