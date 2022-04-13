@@ -47,8 +47,8 @@ def interact():
     
 
         #____________________________Repay____________________________
-        weth_token.approve(swap.address, amount, {"from": account1})
-        swap.repay(accountPublic1, nft_address, tokenID, amount, {"from": account1})
+        #weth_token.approve(swap.address, amount, {"from": account1})
+        #swap.repay(accountPublic1, nft_address, tokenID, amount, {"from": account1})
 
 
         #____________________________Trade____________________________
